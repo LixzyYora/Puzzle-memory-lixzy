@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory Puzzle by LIXZY</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #1e1e2f, #33334d);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 10px;
+      font-size: 2em;
+      text-align: center;
+      color: #ff4d4d;
+      text-shadow: 1px 1px 4px #000;
+    }
+
+    #by {
+      font-size: 0.9em;
+      margin-bottom: 15px;
+      color: #aaa;
+    }
+
+    #score {
+      background: #222;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    #gameBoard {
+      display: grid;
+      grid-template-columns: repeat(4, 70px);
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .card {
+      width: 70px;
+      height: 70px;
+      background: #444;
+      border-radius: 10px;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .card.flipped {
+      background: #fff;
+      color: #000;
+      transform: scale(1.1);
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 1em;
+      height: 1.5em;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #e43d3d;
+    }
+
+    @media (max-width: 480px) {
+      #gameBoard {
+        grid-template-columns: repeat(4, 60px);
+      }
+
+      .card {
+        width: 60px;
+        height: 60px;
+        font-size: 1.7em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Memory Puzzle</h1>
+  <div id="by">by LIXZY</div>
+  <div id="score">Score: <span id="scoreValue">0</span></div>
+  <div id="gameBoard"></div>
+  <div id="message"></div>
+  <button onclick="resetGame()">🔁 Main Lagi</button>
+
+  <script>
+    const emojis = ['🍕', '🍔', '🍟', '🌭', '🍿', '🍩', '🍪', '🧁'];
+    let cards = [...emojis, ...emojis];
+    let flipped = [];
+    let matched = 0;
+    let score = 0;
+
+    const board = document.getElementById('gameBoard');
+    const message = document.getElementById('message');
+    const scoreDisplay = document.getElementById('scoreValue');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createBoard() {
+      board.innerHTML = '';
+      shuffle(cards).forEach((emoji, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.emoji = emoji;
+        card.dataset.index = index;
+        card.addEventListener('click', flipCard);
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+      if (this.classList.contains('flipped') || flipped.length === 2) return;
+
+      this.classList.add('flipped');
+      this.textContent = this.dataset.emoji;
+      flipped.push(this);
+
+      if (flipped.length === 2) {
+        setTimeout(checkMatch, 700);
+      }
+    }
+
+    function checkMatch() {
+      const [c1, c2] = flipped;
+      if (c1.dataset.emoji === c2.dataset.emoji) {
+        c1.removeEventListener('click', flipCard);
+        c2.removeEventListener('click', flipCard);
+        matched += 2;
+        score += 10;
+        message.textContent = '✅ Cocok!';
+      } else {
+        c1.classList.remove('flipped');
+        c2.classList.remove('flipped');
+        c1.textContent = '';
+        c2.textContent = '';
+        score -= 5;
+        message.textContent = '❌ Salah!';
+      }
+
+      scoreDisplay.textContent = score;
+      flipped = [];
+
+      if (matched === cards.length) {
+        message.textContent = '🏆 Kamu Menang!';
+      }
+    }
+
+    function resetGame() {
+      flipped = [];
+      matched = 0;
+      score = 0;
+      scoreDisplay.textContent = score;
+      message.textContent = '';
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
